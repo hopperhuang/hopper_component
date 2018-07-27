@@ -4,7 +4,7 @@
   "description": "hopper's private component",
   "main": "index.js",
   "scripts": {
-    "build": "./node_modules/rollup/bin/rollup",
+    "build": "./node_modules/rollup/bin/rollup -c",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
