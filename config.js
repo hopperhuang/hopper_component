@@ -1,8 +1,10 @@
-import commonjs from 'rollup-plugin-commonjs';
-import nodeResolve from 'rollup-plugin-node-resolve';
-import babel from 'rollup-plugin-babel';
+/* eslint-disable */
+const nodeResolve = require('rollup-plugin-node-resolve');
+const babel = require('rollup-plugin-babel');
+const commonjs = require('rollup-plugin-commonjs');
+/* eslint-enable */
 
-export default {
+module.exports = {
   input: 'src/index.js',
   output: [
     {
