@@ -6,6 +6,9 @@ class Page extends React.Component {
   render() {
     return (
       <div>
+        <div>
+          i like here....
+        </div>
         <Footer />
       </div>
     );

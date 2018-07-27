@@ -72,22 +72,42 @@ if (env === 'production') {
   };
 
   // compile example with webpack
+  const compiler = webpack(webpackConfig);
+  let webpackWatcher;
   const compileExample = () => {
-    webpack(webpackConfig, (err, stats) => {
+    // webpack(webpackConfig, (err, stats) => {
+    //   if (err || stats.hasErrors()) {
+    //     // handle errors
+    //     console.log('error: ', err);
+    //   } else {
+    //     // notify browsers to refresh
+    //     console.log('examples is compiled .....');
+    //     // log webpack details
+    //     console.log(stats.toString({
+    //       colors: true,
+    //     }));
+    //   }
+    // });
+    // close exist watcher
+    if (webpackWatcher) {
+      webpackWatcher.close();
+    }
+    // make a new watcher
+    webpackWatcher = compiler.watch({
+      // watch /example/src files
+      aggregateTimeout: 300,
+      ignored: /node_modules/,
+      poll: undefined,
+    }, (err, stats) => {
+      // logger
       if (err || stats.hasErrors()) {
-        // handle errors
         console.log('error: ', err);
       } else {
-        // notify browsers to refresh
-        console.log('examples is compiled .....');
-        // log webpack details
-        console.log(stats.toString({
-          colors: true,
-        }));
+        const logs = stats.toString ? stats.toString({ colors: true }) : 'waiting for watching ....';
+        console.log(logs);
       }
     });
   };
-
   const watcher = rollup.watch(watchOptions);
   const eventHandler = {
     START: () => { console.log('start watching ...'); },
@@ -97,7 +117,7 @@ if (env === 'production') {
       console.log('all bundle task end');
       compileExample();
     },
-    ERROR: () => { console.log('encounter an error when bundle'); },
+    ERROR: (event) => { console.log('encounter an error when bundle'); console.log(event); },
     FATAL: () => { console.log('unrecoverable error'); },
   };
 
@@ -112,6 +132,6 @@ if (env === 'production') {
     //   ERROR        — encountered an error while bundling
     //   FATAL        — encountered an unrecoverable error
     const { code } = event;
-    eventHandler[code]();
+    eventHandler[code](event);
   });
 }
