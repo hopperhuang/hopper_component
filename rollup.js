@@ -1,6 +1,8 @@
 /* eslint-disable */
+const webpack = require("webpack");
 const rollup = require('rollup');
 const config = require('./config');
+const webpackConfig = require('./webpack.config');
 /* eslint-enable */
 
 const inputOptions = {
@@ -40,6 +42,13 @@ async function buildEjs() {
   await bundle.write(ejsOption);
 }
 
+// console.log(process.pid);
+// process.on('SIGINT', (code) => {
+//   console.log(code);
+//   process.exit(0);
+// });
+
+
 const env = process.env.NODE_ENV;
 if (env === 'production') {
   // build files when in production enviroment
@@ -62,15 +71,37 @@ if (env === 'production') {
     },
   };
 
+  // compile example with webpack
+  const compileExample = () => {
+    webpack(webpackConfig, (err, stats) => {
+      if (err || stats.hasErrors()) {
+        // handle errors
+        console.log('error: ', err);
+      } else {
+        // notify browsers to refresh
+        console.log('examples is compiled .....');
+        // log webpack details
+        console.log(stats.toString({
+          colors: true,
+        }));
+      }
+    });
+  };
+
   const watcher = rollup.watch(watchOptions);
   const eventHandler = {
     START: () => { console.log('start watching ...'); },
     BUNDLE_START: () => { console.log('bundle start'); },
     BUNDLE_END: () => { console.log('bundle end'); },
-    END: () => { console.log('all bundle task end'); },
+    END: () => {
+      console.log('all bundle task end');
+      compileExample();
+    },
     ERROR: () => { console.log('encounter an error when bundle'); },
     FATAL: () => { console.log('unrecoverable error'); },
   };
+
+
   watcher.on('event', (event) => {
     // console.log(event);
     // event.code can be one of:
