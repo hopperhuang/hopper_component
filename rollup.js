@@ -45,11 +45,34 @@ async function buildEjs() {
   await bundle.write(ejsOption);
 }
 
-// console.log(process.pid);
-// process.on('SIGINT', (code) => {
-//   console.log(code);
-//   process.exit(0);
-// });
+// server configs to serve example dist file
+let server;
+
+
+function startServer() {
+  // if sever is not start, start sever
+  if (!server) {
+    const options = {
+      cleanUrls: true,
+      public: './example/dist',
+    };
+    server = http.createServer((request, response) => handler(request, response, options));
+    // listen to 3000 prot
+    server.listen(3000, () => {
+      bs.init({
+        open: true,
+        ui: false,
+        files: 'example/dist',
+        notify: false,
+        watch: true,
+        proxy: 'localhost:3000',
+        port: 9000,
+        // server: ''
+      });
+      console.log('Running at http://localhost:9000');
+    });
+  }
+}
 
 
 const env = process.env.NODE_ENV;
@@ -63,19 +86,6 @@ if (env === 'production') {
   const compiler = webpack(webpackConfig);
   let webpackWatcher;
   const compileExample = () => {
-    // webpack(webpackConfig, (err, stats) => {
-    //   if (err || stats.hasErrors()) {
-    //     // handle errors
-    //     console.log('error: ', err);
-    //   } else {
-    //     // notify browsers to refresh
-    //     console.log('examples is compiled .....');
-    //     // log webpack details
-    //     console.log(stats.toString({
-    //       colors: true,
-    //     }));
-    //   }
-    // });
     // close exist watcher
     if (webpackWatcher) {
       webpackWatcher.close();
@@ -93,38 +103,11 @@ if (env === 'production') {
       } else {
         const logs = stats.toString ? stats.toString({ colors: true }) : 'waiting for watching ....';
         console.log(logs);
+
+        // serve for dist
+        startServer();
       }
     });
-  };
-
-
-  // server configs to serve example dist file
-  let server;
-
-
-  const startServer = () => {
-    // if sever is not start, start sever
-    if (!server) {
-      const options = {
-        cleanUrls: true,
-        public: './example/dist',
-      };
-      server = http.createServer((request, response) => handler(request, response, options));
-      // listen to 3000 prot
-      server.listen(3000, () => {
-        bs.init({
-          open: true,
-          ui: false,
-          files: 'example/dist',
-          notify: false,
-          watch: true,
-          proxy: 'localhost:3000',
-          port: 9000,
-          // server: ''
-        });
-        console.log('Running at http://localhost:9000');
-      });
-    }
   };
 
 
@@ -157,7 +140,7 @@ if (env === 'production') {
       // use webpack compile example
       compileExample();
       // serve dist file
-      startServer();
+      // startServer();
     },
     ERROR: (event) => { console.log('encounter an error when bundle'); console.log(event); },
     FATAL: () => { console.log('unrecoverable error'); },
