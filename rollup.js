@@ -3,6 +3,9 @@ const webpack = require("webpack");
 const rollup = require('rollup');
 const config = require('./config');
 const webpackConfig = require('./webpack.config');
+const handler = require('serve-handler');
+const http = require('http');
+var bs = require("browser-sync").create();
 /* eslint-enable */
 
 const inputOptions = {
@@ -54,22 +57,7 @@ if (env === 'production') {
   // build files when in production enviroment
   buildCjs().then(() => { buildEjs(); });
 } else {
-  // build file and watch file
-  // just build cjs format
-  const outputOptions = cjsOption;
-  const watchOptions = {
-    ...inputOptions,
-    output: [outputOptions],
-    watch: {
-      include: 'src/**',
-      exclude: [
-        'node_modules/**',
-        'dist/*',
-        'example/**',
-      ],
-      clearScreen: true,
-    },
-  };
+  // webpack configs complie example
 
   // compile example with webpack
   const compiler = webpack(webpackConfig);
@@ -108,6 +96,57 @@ if (env === 'production') {
       }
     });
   };
+
+
+  // server configs to serve example dist file
+  let server;
+
+
+  const startServer = () => {
+    // if sever is not start, start sever
+    if (!server) {
+      const options = {
+        cleanUrls: true,
+        public: './example/dist',
+      };
+      server = http.createServer((request, response) => handler(request, response, options));
+      // listen to 3000 prot
+      server.listen(3000, () => {
+        bs.init({
+          open: true,
+          ui: false,
+          files: 'example/dist',
+          notify: false,
+          watch: true,
+          proxy: 'localhost:3000',
+          port: 9000,
+          // server: ''
+        });
+        console.log('Running at http://localhost:9000');
+      });
+    }
+  };
+
+
+  // rollup configs for compile
+
+  // build file and watch file
+  // just build cjs format
+  const outputOptions = cjsOption;
+  const watchOptions = {
+    ...inputOptions,
+    output: [outputOptions],
+    watch: {
+      include: 'src/**',
+      exclude: [
+        'node_modules/**',
+        'dist/*',
+        'example/**',
+      ],
+      clearScreen: true,
+    },
+  };
+  // compile src files
   const watcher = rollup.watch(watchOptions);
   const eventHandler = {
     START: () => { console.log('start watching ...'); },
@@ -115,7 +154,10 @@ if (env === 'production') {
     BUNDLE_END: () => { console.log('bundle end'); },
     END: () => {
       console.log('all bundle task end');
+      // use webpack compile example
       compileExample();
+      // serve dist file
+      startServer();
     },
     ERROR: (event) => { console.log('encounter an error when bundle'); console.log(event); },
     FATAL: () => { console.log('unrecoverable error'); },
@@ -133,5 +175,20 @@ if (env === 'production') {
     //   FATAL        — encountered an unrecoverable error
     const { code } = event;
     eventHandler[code](event);
+  });
+
+  // listen on exit signal clean watcher
+
+  process.on('SIGINT', () => {
+    // clean wepback watcher
+    webpackWatcher.close();
+    // exit browser sync
+    bs.exit();
+    // close server
+    server.close(() => {
+      // console.log('close server......');
+    });
+    console.log('close server ......');
+    console.log('exit ......');
   });
 }
