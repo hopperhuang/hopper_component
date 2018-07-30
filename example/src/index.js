@@ -1,6 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+
+// import from /dist
 import Footer from '../../dist/index';
+import '../../dist/index.css';
 
 class Page extends React.Component {
   render() {
