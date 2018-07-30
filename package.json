@@ -18,6 +18,10 @@
   "files": [
     "dist"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hopperhuang/hopper_component"
+  },
   "author": "hopperhuang",
   "license": "ISC",
   "devDependencies": {
