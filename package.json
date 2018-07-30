@@ -45,6 +45,7 @@
     "rollup-plugin-babel": "^3.0.7",
     "rollup-plugin-commonjs": "^9.1.4",
     "rollup-plugin-node-resolve": "^3.3.0",
+    "rollup-plugin-postcss": "^1.6.2",
     "serve-handler": "^3.6.0",
     "webpack": "^4.16.3"
   },

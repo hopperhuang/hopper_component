@@ -1,29 +1,44 @@
 /* eslint-disable */
 const webpack = require("webpack");
 const rollup = require('rollup');
-const config = require('./config');
+// const config = require('./config');
+const getRollupConfigs = require('./config');
 const webpackConfig = require('./webpack.config');
 const handler = require('serve-handler');
 const http = require('http');
 var bs = require("browser-sync").create();
 /* eslint-enable */
 
-const inputOptions = {
-  input: config.input,
-  external: config.external,
-  plugins: config.plugins,
+const cjsConfig = getRollupConfigs('cjs');
+const cjsInputOptions = {
+  input: cjsConfig.input,
+  external: cjsConfig.external,
+  plugins: cjsConfig.plugins,
 };
+
+const ejsConfig = getRollupConfigs('ejs');
+const ejsInputOptions = {
+  input: ejsConfig.input,
+  external: ejsConfig.external,
+  plugins: ejsConfig.plugins,
+};
+
+// const inputOptions = {
+//   input: config.input,
+//   external: config.external,
+//   plugins: config.plugins,
+// };
 
 
 // get cjs output cofig when develop
-const cjsOption = config.output[0];
-const ejsOption = config.output[1];
+const cjsOption = cjsConfig.output;
+const ejsOption = ejsConfig.output;
 
 
 // build cjs
 async function buildCjs() {
   // create a bundle
-  const bundle = await rollup.rollup(inputOptions);
+  const bundle = await rollup.rollup(cjsInputOptions);
 
   //   console.log(bundle.imports); // an array of external dependencies
   //   console.log(bundle.exports); // an array of names exported by the entry point
@@ -41,7 +56,7 @@ async function buildCjs() {
 
 // build ejs
 async function buildEjs() {
-  const bundle = await rollup.rollup(inputOptions);
+  const bundle = await rollup.rollup(ejsInputOptions);
   await bundle.write(ejsOption);
 }
 
@@ -117,7 +132,7 @@ if (env === 'production') {
   // just build cjs format
   const outputOptions = cjsOption;
   const watchOptions = {
-    ...inputOptions,
+    ...cjsInputOptions,
     output: [outputOptions],
     watch: {
       include: 'src/**',

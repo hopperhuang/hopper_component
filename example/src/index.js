@@ -7,7 +7,7 @@ class Page extends React.Component {
     return (
       <div>
         <div>
-          i like here
+          i like here ...
         </div>
         <Footer />
       </div>
