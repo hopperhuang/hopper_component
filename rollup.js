@@ -82,6 +82,7 @@ function startServer() {
         watch: true,
         proxy: 'localhost:3000',
         port: 9000,
+        reloadThrottle: 1500,
         // server: ''
       });
       console.log('Running at http://localhost:9000');
