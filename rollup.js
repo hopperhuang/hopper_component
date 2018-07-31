@@ -9,6 +9,12 @@ const http = require('http');
 var bs = require("browser-sync").create();
 /* eslint-enable */
 
+// const copyUtils = require('./utils/copyfile');
+
+// const { copyFiles } = copyUtils;
+
+// rollup build configs
+
 const cjsConfig = getRollupConfigs('cjs');
 const cjsInputOptions = {
   input: cjsConfig.input,
@@ -22,13 +28,6 @@ const ejsInputOptions = {
   external: ejsConfig.external,
   plugins: ejsConfig.plugins,
 };
-
-// const inputOptions = {
-//   input: config.input,
-//   external: config.external,
-//   plugins: config.plugins,
-// };
-
 
 // get cjs output cofig when develop
 const cjsOption = cjsConfig.output;
@@ -59,6 +58,7 @@ async function buildEjs() {
   const bundle = await rollup.rollup(ejsInputOptions);
   await bundle.write(ejsOption);
 }
+
 
 // server configs to serve example dist file
 let server;
@@ -91,42 +91,44 @@ function startServer() {
 }
 
 
+// webpack configs complie example
+
+// compile example with webpack
+const compiler = webpack(webpackConfig);
+let webpackWatcher;
+const compileExample = () => {
+  // close exist watcher
+  if (webpackWatcher) {
+    webpackWatcher.close();
+  }
+  // make a new watcher
+  webpackWatcher = compiler.watch({
+    // watch /example/src files
+    aggregateTimeout: 300,
+    ignored: /node_modules/,
+    poll: undefined,
+  }, (err, stats) => {
+    // logger
+    if (err || stats.hasErrors()) {
+      console.log('error: ', err);
+    } else {
+      const logs = stats.toString ? stats.toString({ colors: true }) : 'waiting for watching ....';
+      console.log(logs);
+
+      // serve for dist
+      startServer();
+    }
+  });
+};
+
+// copy css in src folder to dist folder
+
+
 const env = process.env.NODE_ENV;
 if (env === 'production') {
   // build files when in production enviroment
   buildCjs().then(() => { buildEjs(); });
 } else {
-  // webpack configs complie example
-
-  // compile example with webpack
-  const compiler = webpack(webpackConfig);
-  let webpackWatcher;
-  const compileExample = () => {
-    // close exist watcher
-    if (webpackWatcher) {
-      webpackWatcher.close();
-    }
-    // make a new watcher
-    webpackWatcher = compiler.watch({
-      // watch /example/src files
-      aggregateTimeout: 300,
-      ignored: /node_modules/,
-      poll: undefined,
-    }, (err, stats) => {
-      // logger
-      if (err || stats.hasErrors()) {
-        console.log('error: ', err);
-      } else {
-        const logs = stats.toString ? stats.toString({ colors: true }) : 'waiting for watching ....';
-        console.log(logs);
-
-        // serve for dist
-        startServer();
-      }
-    });
-  };
-
-
   // rollup configs for compile
 
   // build file and watch file
@@ -180,14 +182,19 @@ if (env === 'production') {
 
   process.on('SIGINT', () => {
     // clean wepback watcher
-    webpackWatcher.close();
-    // exit browser sync
-    bs.exit();
-    // close server
-    server.close(() => {
+    if (webpackWatcher) {
+      webpackWatcher.close();
+    }
+    if (server) {
+      // exit browser sync
+      bs.exit();
+      // close server
+      server.close(() => {
       // console.log('close server......');
-    });
-    console.log('close server ......');
+      });
+      console.log('close server ......');
+    }
+
     console.log('exit ......');
   });
 }
