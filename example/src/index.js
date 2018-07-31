@@ -3,9 +3,9 @@ import ReactDOM from 'react-dom';
 
 // import from /dist
 import { Footer, Header } from '../../dist/index';
-import '../../dist/index.css';
+import '../../dist/footer.css';
+import '../../dist/header.css';
 
-// const { Footer } = Com;
 
 class Page extends React.Component {
   render() {

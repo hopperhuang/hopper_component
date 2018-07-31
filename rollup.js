@@ -6,12 +6,15 @@ const getRollupConfigs = require('./config');
 const webpackConfig = require('./webpack.config');
 const handler = require('serve-handler');
 const http = require('http');
+const Glob = require('glob');
 var bs = require("browser-sync").create();
 /* eslint-enable */
 
-// const copyUtils = require('./utils/copyfile');
+const copyUtils = require('./utils/copyfile');
 
-// const { copyFiles } = copyUtils;
+const env = process.env.NODE_ENV;
+
+const { copyFiles } = copyUtils;
 
 // rollup build configs
 
@@ -94,7 +97,10 @@ function startServer() {
 // webpack configs complie example
 
 // compile example with webpack
-const compiler = webpack(webpackConfig);
+let compiler;
+if (env !== 'production') {
+  compiler = webpack(webpackConfig);
+}
 let webpackWatcher;
 const compileExample = () => {
   // close exist watcher
@@ -123,11 +129,41 @@ const compileExample = () => {
 
 // copy css in src folder to dist folder
 
+// get css files' filenames
 
-const env = process.env.NODE_ENV;
+function getCssFiles() {
+  // const filenames;
+  const reg = /^\.\/src\/(.+)\/index.css$/;
+  const files = Glob.sync('./src/**/index.css');
+  // eslint-disable-next-line
+  const _filenames = files.map(file => reg.exec(file));
+  const filenames = _filenames.map(file => [file[1], file[0]]);
+  const cssfiles = filenames.map(file => ({
+    src: file[1],
+    dist: `./dist/${file[0]}.css`,
+  }));
+  return cssfiles;
+}
+
+function copyCssFilesToDist(callback) {
+  const cssfiles = getCssFiles();
+  copyFiles(cssfiles).then(() => {
+    if (callback && typeof callback === 'function') {
+      callback();
+    }
+  });
+}
+
+// console.log(getCssFiles());
+
+// rollup compile process
 if (env === 'production') {
-  // build files when in production enviroment
-  buildCjs().then(() => { buildEjs(); });
+  const buildTask = async () => {
+    await buildCjs();
+    await buildEjs();
+    copyCssFilesToDist();
+  };
+  buildTask();
 } else {
   // rollup configs for compile
 
@@ -155,10 +191,11 @@ if (env === 'production') {
     BUNDLE_END: () => { console.log('bundle end'); },
     END: () => {
       console.log('all bundle task end');
-      // use webpack compile example
-      compileExample();
-      // serve dist file
-      // startServer();
+      // copycssfiles to dist
+      copyCssFilesToDist(
+        // and then use webpack compile example
+        compileExample,
+      );
     },
     ERROR: (event) => { console.log('encounter an error when bundle'); console.log(event); },
     FATAL: () => { console.log('unrecoverable error'); },

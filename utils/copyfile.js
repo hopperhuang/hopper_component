@@ -15,28 +15,13 @@ function copyFile(source, target) {
   });
 }
 
-function copyFiles(files, callback) {
+function copyFiles(files) {
   const tasks = files.map((file) => {
     const { src, dist } = file;
     return copyFile(src, dist);
   });
-  Promise.all(tasks).then(() => {
-    if (callback && typeof callback === 'function') {
-      callback();
-    }
-  });
+  return Promise.all(tasks);
 }
-
-// copyFiles([
-//   {
-//     src: '../src/header.css',
-//     dist: '../dist/header.css',
-//   },
-//   {
-//     src: '../src/footer.css',
-//     dist: '../dist/footer.css',
-//   },
-// ]);
 
 module.exports = {
   copyFile,
