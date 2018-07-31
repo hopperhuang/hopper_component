@@ -1,4 +1,6 @@
 .header {
     color: blue;
-    font-size: 28px;
+    .content {
+        font-size: 22px;
+    }
 }

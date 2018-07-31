@@ -198,7 +198,7 @@ if (env === 'production') {
       );
     },
     ERROR: (event) => { console.log('encounter an error when bundle'); console.log(event); },
-    FATAL: () => { console.log('unrecoverable error'); },
+    FATAL: (event) => { console.log('unrecoverable error'); console.log(event); },
   };
 
 

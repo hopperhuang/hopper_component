@@ -1,4 +1,6 @@
 .footer {
     color: red;
-    font-size: 26px;
+    .content {
+        font-size: 24px;
+    }
 }

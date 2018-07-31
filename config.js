@@ -6,10 +6,15 @@ const babel = require('rollup-plugin-babel');
 const commonjs = require('rollup-plugin-commonjs');
 const postcss = require('rollup-plugin-postcss');
 const uglify = require('rollup-plugin-uglify').uglify;
+const simplevars = require('postcss-simple-vars');
+const nested = require('postcss-nested');
+const cssnext = require('postcss-cssnext');
+const cssnano = require('cssnano');
 /* eslint-enable */
 
 
 module.exports = function getRollupConfigs(type) {
+  const env = process.env.NODE_ENV;
   return {
     input: 'src/index.js',
     output: type === 'cjs'
@@ -21,9 +26,15 @@ module.exports = function getRollupConfigs(type) {
         format: 'es',
       },
     plugins: [
-      ((process.env.NODE_ENV === 'production' && type === 'cjs') && uglify()),
+      ((env === 'production' && type === 'cjs') && uglify()),
       postcss({
         extract: type === 'cjs',
+        plugins: [
+          simplevars(),
+          nested(),
+          cssnext({ }),
+          (env === 'production' && cssnano()),
+        ].filter(e => !!e),
       }),
       babel({
         exclude: 'node_modules/**',
