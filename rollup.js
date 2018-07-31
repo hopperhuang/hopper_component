@@ -151,17 +151,6 @@ function getCssFiles() {
 
 // use postcss to compile css files and move it to the dist folder
 
-// const postCssPlugins = getPostcssPlugins();
-
-// const postcssComplieFile = (content, src, dist) => postcss(postCssPlugins)
-//   .process(content, { from: src, to: dist })
-//   .then((result) => {
-//     fs.writeFile(dist, result.css, () => true);
-//     if (result.map) {
-//       fs.writeFile(dist, result.map, () => true);
-//     }
-//   });
-
 const { postcssComplieFile } = postcss;
 
 const postcssAndCopyFiles = () => {
