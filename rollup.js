@@ -182,6 +182,9 @@ if (env === 'production') {
     ...cjsInputOptions,
     output: [outputOptions],
     watch: {
+      chokidar: {
+        atomic: 2000,
+      },
       include: 'src/**',
       exclude: [
         'node_modules/**',
