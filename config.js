@@ -5,6 +5,7 @@ const nodeResolve = require('rollup-plugin-node-resolve');
 const babel = require('rollup-plugin-babel');
 const commonjs = require('rollup-plugin-commonjs');
 const postcss = require('rollup-plugin-postcss');
+const uglify = require('rollup-plugin-uglify').uglify;
 /* eslint-enable */
 
 
@@ -20,6 +21,7 @@ module.exports = function getRollupConfigs(type) {
         format: 'es',
       },
     plugins: [
+      ((process.env.NODE_ENV === 'production' && type === 'cjs') && uglify()),
       postcss({
         extract: type === 'cjs',
       }),

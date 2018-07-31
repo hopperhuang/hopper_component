@@ -48,6 +48,7 @@
     "rollup-plugin-commonjs": "^9.1.4",
     "rollup-plugin-node-resolve": "^3.3.0",
     "rollup-plugin-postcss": "^1.6.2",
+    "rollup-plugin-uglify": "^4.0.0",
     "serve-handler": "^3.6.0",
     "style-loader": "^0.21.0",
     "webpack": "^4.16.3"
