@@ -4,9 +4,9 @@ import ReactDOM from 'react-dom';
 // import from /dist
 import { Footer, Header } from '../../dist/index';
 
-import '../../dist/index.css';
-// import '../../dist/footer.css';
-// import '../../dist/header.css';
+// import '../../dist/index.css';
+import '../../dist/footer.css';
+import '../../dist/header.css';
 
 
 class Page extends React.Component {

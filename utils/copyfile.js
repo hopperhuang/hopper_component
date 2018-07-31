@@ -23,7 +23,20 @@ function copyFiles(files) {
   return Promise.all(tasks);
 }
 
+function readFile(filename) {
+  return new Promise((resolve, reject) => {
+    fs.readFile(filename, (err, content) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(content);
+      }
+    });
+  }).catch((err) => { throw err; });
+}
+
 module.exports = {
+  readFile,
   copyFile,
   copyFiles,
 };

@@ -8,13 +8,17 @@ const handler = require('serve-handler');
 const http = require('http');
 const Glob = require('glob');
 var bs = require("browser-sync").create();
+// const postcss = require('postcss');
+// const fs = require('fs');
 /* eslint-enable */
 
 const copyUtils = require('./utils/copyfile');
+const postcss = require('./postcss');
 
 const env = process.env.NODE_ENV;
 
-const { copyFiles } = copyUtils;
+// eslint-disable-next-line
+const { copyFiles, readFile } = copyUtils;
 
 // rollup build configs
 
@@ -145,23 +149,38 @@ function getCssFiles() {
   return cssfiles;
 }
 
-function copyCssFilesToDist(callback) {
-  const cssfiles = getCssFiles();
-  copyFiles(cssfiles).then(() => {
-    if (callback && typeof callback === 'function') {
-      callback();
-    }
-  });
-}
+// use postcss to compile css files and move it to the dist folder
 
-// console.log(getCssFiles());
+// const postCssPlugins = getPostcssPlugins();
+
+// const postcssComplieFile = (content, src, dist) => postcss(postCssPlugins)
+//   .process(content, { from: src, to: dist })
+//   .then((result) => {
+//     fs.writeFile(dist, result.css, () => true);
+//     if (result.map) {
+//       fs.writeFile(dist, result.map, () => true);
+//     }
+//   });
+
+const { postcssComplieFile } = postcss;
+
+const postcssAndCopyFiles = () => {
+  const cssfiles = getCssFiles();
+  const tasks = cssfiles.map((file) => {
+    const { src, dist } = file;
+    return readFile(src).then(content => postcssComplieFile(content, src, dist));
+  });
+  return Promise.all(tasks).catch((err) => { console.log(err); });
+};
+
 
 // rollup compile process
 if (env === 'production') {
   const buildTask = async () => {
     await buildCjs();
     await buildEjs();
-    copyCssFilesToDist();
+    await postcssAndCopyFiles();
+    // copyCssFilesToDist();
   };
   buildTask();
 } else {
@@ -191,11 +210,8 @@ if (env === 'production') {
     BUNDLE_END: () => { console.log('bundle end'); },
     END: () => {
       console.log('all bundle task end');
-      // copycssfiles to dist
-      copyCssFilesToDist(
-        // and then use webpack compile example
-        compileExample,
-      );
+      // postcss compile csss and move them to dist
+      postcssAndCopyFiles().then(() => compileExample());
     },
     ERROR: (event) => { console.log('encounter an error when bundle'); console.log(event); },
     FATAL: (event) => { console.log('unrecoverable error'); console.log(event); },
