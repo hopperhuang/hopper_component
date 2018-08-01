@@ -3,7 +3,7 @@ const webpack = require("webpack");
 const rollup = require('rollup');
 // const config = require('./config');
 const getRollupConfigs = require('./config');
-const webpackConfig = require('./webpack.config');
+const getWebpackConfigs = require('./webpack.config');
 const handler = require('serve-handler');
 const http = require('http');
 const Glob = require('glob');
@@ -99,7 +99,7 @@ function startServer() {
 
 
 // webpack configs complie example
-
+const webpackConfig = getWebpackConfigs();
 // compile example with webpack
 let compiler;
 if (env !== 'production') {
@@ -120,7 +120,7 @@ const compileExample = () => {
   }, (err, stats) => {
     // logger
     if (err || stats.hasErrors()) {
-      console.log('error: ', err);
+      console.log('webpack-errror: ', stats.toString({ color: true }));
     } else {
       const logs = stats.toString ? stats.toString({ colors: true }) : 'waiting for watching ....';
       console.log(logs);

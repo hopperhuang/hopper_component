@@ -1,23 +1,32 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-// import from /dist
-import { Footer, Header } from '../../dist/index';
 
-// import '../../dist/index.css';
-import '../../dist/footer.css';
-import '../../dist/header.css';
-
+const pages = [
+  {
+    title: 'Header',
+    path: '/header',
+  },
+  {
+    title: 'Footer',
+    path: '/footer',
+  },
+];
 
 class Page extends React.Component {
   render() {
     return (
       <div>
-        <Header />
-        <div>
-          i like here ...
-        </div>
-        <Footer />
+        <h1>
+          组件库导航页
+        </h1>
+        {pages.map(page => (
+          <div>
+            <a href={page.path}>
+              {page.title}
+            </a>
+          </div>
+        ))}
       </div>
     );
   }
